@@ -1,0 +1,49 @@
+# Python cache / bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Logs and databases
+*.log
+*.sqlite3
+*.db
+
+# IDE / editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python packages / distributions
+*.egg
+*.egg-info/
+dist/
+build/
+pip-wheel-metadata/
+
+# PyTorch / Torch / large binaries
+*.pt
+*.pth
+*.dll
+*.lib
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+
+# HuggingFace cache (optional)
+~/.cache/huggingface/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+venv/
