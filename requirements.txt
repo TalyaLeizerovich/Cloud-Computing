@@ -1,0 +1,15 @@
+# FastAPI server
+fastapi==0.111.1
+uvicorn[standard]==0.23.2
+
+# HTTP requests
+requests==2.31.0
+
+# HuggingFace transformers
+transformers==4.41.0
+torch==2.2.0
+
+# Database (SOMEE SQL Server)
+pyodbc==4.0.39
+
+
