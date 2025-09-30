@@ -4,8 +4,11 @@ import json
 import os
 from datetime import datetime, date
 
-# API key for The Guardian API
-GUARDIAN_KEY = "0b15e60e-4044-4006-b169-17230da9666f"
+# קריאת קובץ הקונפיג
+with open("keys.json", "r") as f:
+    keys = json.load(f)
+GUARDIAN_KEY = keys["GUARDIAN_API_KEY"]
+
 # Endpoint for The Guardian API
 ENDPOINT = "https://content.guardianapis.com/search"
 # File to store fetched articles

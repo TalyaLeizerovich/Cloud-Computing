@@ -1,9 +1,14 @@
 # app/classifier.py
-import os  # For accessing environment variables
+
 import requests  # For making HTTP requests to external APIs
 import json  # For handling JSON serialization and deserialization
 
-HF_API_TOKEN = os.getenv("HF_API_TOKEN")  # Get HuggingFace API token from environment
+
+with open("keys.json", "r") as f:
+    keys = json.load(f)
+
+HF_API_TOKEN = keys["HF_API_TOKEN"]
+
 API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"  # HuggingFace zero-shot model endpoint
 CANDIDATE_LABELS = ["technology", "politics", "sports", "health", "business", "entertainment", "science"]  # Possible topics
 

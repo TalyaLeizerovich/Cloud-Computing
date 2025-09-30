@@ -76,8 +76,73 @@
 
 
 
+#עובד- כתבה עם תמונה ישר אחרי הכתבה אבל בלי כותרת ושעת פרסום
+# from kafka import KafkaConsumer
+# import pyodbc
+# import json
+# from config import KAFKA_BROKER, DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
+
+# # --- Database connection string ---
+# conn_str = (
+#     f"DRIVER={{ODBC Driver 18 for SQL Server}};"
+#     f"SERVER={DB_HOST},{DB_PORT};"
+#     f"DATABASE={DB_NAME};"
+#     f"UID={DB_USER};PWD={DB_PASSWORD};"
+#     f"Encrypt=yes;TrustServerCertificate=yes;"
+# )
+
+# # --- Consumer matched to your Producer ---
+# def consume_article_ids(topic_name, timeout=5000):
+#     """
+#     Receives article IDs from Kafka by topic.
+#     Matches the format that the Producer sends: {"article_id": ...}
+#     """
+#     consumer = KafkaConsumer(
+#         topic_name,
+#         bootstrap_servers=KAFKA_BROKER,
+#         auto_offset_reset='earliest',
+#         value_deserializer=lambda m: json.loads(m.decode('utf-8')),
+#         consumer_timeout_ms=timeout
+#     )
+#     article_ids = []
+#     for message in consumer:
+#         try:
+#             data = message.value
+#             article_id = data.get("article_id")
+#             if article_id is not None:
+#                 article_ids.append(article_id)
+#         except Exception as e:
+#             print(f"Error decoding message: {e}")
+#     return article_ids
+
+# # --- Fetch articles from DB by IDs ---
+# def fetch_articles_by_ids(ids):
+#     if not ids:
+#         return []
+#     try:
+#         with pyodbc.connect(conn_str, timeout=5) as conn:
+#             cursor = conn.cursor()
+#             placeholders = ','.join('?' for _ in ids)
+#             # שולף את העמודות הקיימות בטבלה: content, date, topic
+#             query = f"SELECT content, date, topic FROM Posts WHERE newId IN ({placeholders})"
+#             cursor.execute(query, ids)
+#             return cursor.fetchall()
+#     except pyodbc.OperationalError as e:
+#         print("Error connecting to DB:", e)
+#         return []
+
+# # --- Format articles for Gradio ---
+# def format_articles(articles):
+#     if not articles:
+#         return "אין כתבות זמינות לנושא זה."
+#     md = ""
+#     for content, date, topic in articles:
+#         md += f"### {topic} ({date})\n{content}\n\n---\n"
+#     return md
 
 
+
+#כותרת עם תאריך ותמונה לצד הכתבה
 from kafka import KafkaConsumer
 import pyodbc
 import json
@@ -118,25 +183,55 @@ def consume_article_ids(topic_name, timeout=5000):
 
 # --- Fetch articles from DB by IDs ---
 def fetch_articles_by_ids(ids):
+    """
+    שולף כתבות מה־DB לפי IDs.
+    מחזיר רשימת מילונים: {id, title, content, date, topic}
+    """
     if not ids:
         return []
     try:
         with pyodbc.connect(conn_str, timeout=5) as conn:
             cursor = conn.cursor()
             placeholders = ','.join('?' for _ in ids)
-            # שולף את העמודות הקיימות בטבלה: content, date, topic
-            query = f"SELECT content, date, topic FROM Posts WHERE newId IN ({placeholders})"
+            query = f"""
+                SELECT newId, comments, content, date, topic
+                FROM Posts
+                WHERE newId IN ({placeholders})
+            """
             cursor.execute(query, ids)
-            return cursor.fetchall()
+            rows = cursor.fetchall()
+
+            # הופך כל שורה למילון
+            articles = []
+            for row in rows:
+                articles.append({
+                    "id": row.newId,
+                    "title": row.comments,   # הכותרת
+                    "content": row.content,
+                    "date": row.date,
+                    "topic": row.topic
+                })
+            return articles
     except pyodbc.OperationalError as e:
         print("Error connecting to DB:", e)
         return []
 
 # --- Format articles for Gradio ---
 def format_articles(articles):
+    """
+    מחזיר טקסט Markdown ל־Gradio.
+    """
     if not articles:
         return "אין כתבות זמינות לנושא זה."
+
     md = ""
-    for content, date, topic in articles:
-        md += f"### {topic} ({date})\n{content}\n\n---\n"
+    for article in articles:
+        title = article.get("title", "ללא כותרת")
+        date = article.get("date", "ללא תאריך")
+        content = article.get("content", "")
+        topic = article.get("topic", "כללי")
+
+        md += f"### {title}\n"
+        md += f"**תאריך:** {date} | **נושא:** {topic}\n\n"
+        md += f"{content}\n\n---\n"
     return md

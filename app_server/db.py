@@ -82,9 +82,6 @@
 #         "message": f"לא הצלחנו להכניס את הפוסט אחרי {max_attempts} ניסיונות – כל ה־article_id שהוגרלו כבר קיימים."
 #     }
 
-
-
-# app/db_handler.py
 import pyodbc  # Library for connecting to SQL Server databases via ODBC
 import random  # For generating random article IDs
 from datetime import datetime  # To handle datetime objects
@@ -103,9 +100,10 @@ def save_to_db(article: dict, max_attempts: int = 10):
     If article_id already exists, generates a new one and retries.
     After successful insertion, sends article_id to Kafka topic based on article['topic'].
     """
-    content = article.get("content", "")  # Get article content or empty string if missing
-    topic = article.get("topic", "")  # Get article topic or empty string if missing
-    published_at = article.get("publishedAt", datetime.now())  # Use current datetime if missing
+    content = article.get("content", "")  # תוכן הכתבה
+    topic = article.get("topic", "")  # נושא הכתבה
+    published_at = article.get("publishedAt", datetime.now())  # זמן הפרסום
+    title = article.get("title", "")  # ✅ כותרת הכתבה – נכניס ל-comments
 
     # Connection string to the SQL Server database hosted on SOMEE
     conn_str = (
@@ -134,7 +132,7 @@ def save_to_db(article: dict, max_attempts: int = 10):
             INSERT INTO dbo.Posts (newId, date, content, topic, comments)
             VALUES (?, ?, ?, ?, ?)
             """
-            cursor.execute(insert_query, newId, published_at, content, topic, None)
+            cursor.execute(insert_query, newId, published_at, content, topic, title)  # ✅ הכנסנו title ל-comments
             conn.commit()  # Commit the transaction
 
             cursor.close()  # Close cursor
@@ -142,7 +140,7 @@ def save_to_db(article: dict, max_attempts: int = 10):
 
             # Successfully inserted – now send the ID to Kafka based on topic
             topic_to_send = topic.lower() if topic else ""
-            payload = {"article_id": newId}  # ✅ שליחת מילון ישירות, KafkaProducer כבר עושה JSON serialization
+            payload = {"article_id": newId}
 
             if topic_to_send in KNOWN_TOPICS:
                 producer.send(topic_to_send, payload)
