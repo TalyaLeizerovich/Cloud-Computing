@@ -12,4 +12,10 @@ torch==2.2.0
 # Database (SOMEE SQL Server)
 pyodbc==4.0.39
 
+# Gradio for web interface
+gradio==3.43.1
+kafka-python==2.2.0
+
+
+
 
