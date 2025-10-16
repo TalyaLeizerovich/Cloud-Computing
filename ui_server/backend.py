@@ -229,9 +229,9 @@ def format_articles(articles):
         title = article.get("title", "ללא כותרת")
         date = article.get("date", "ללא תאריך")
         content = article.get("content", "")
-        topic = article.get("topic", "כללי")
-
+      
         md += f"### {title}\n"
-        md += f"**תאריך:** {date} | **נושא:** {topic}\n\n"
+        md += f"**Date:** {date} \n\n"
         md += f"{content}\n\n---\n"
     return md
+

@@ -20,7 +20,7 @@ def classify_article(article: dict):
     """
     text_to_classify = article.get("content", "")  # Extract content or empty string if missing
     published_at = article.get("publishedAt", "")  # Extract published date or empty string if missing
-
+    comments = article.get("comments", "")  # Extract title or empty string if missing
     if not text_to_classify:
         return {"status": "error", "message": "No content to classify."}  # Return error if content is empty
 
@@ -46,7 +46,8 @@ def classify_article(article: dict):
         minimal_json = {
             "publishedAt": published_at,
             "content": text_to_classify,
-            "topic": top_label  # Add predicted topic to article
+            "topic": top_label,  # Add predicted topic to article
+            "comments": comments  # Retain the title in comments
         }
 
         # Optionally save the classified article to a JSON file

@@ -82,6 +82,9 @@
 #         "message": f"לא הצלחנו להכניס את הפוסט אחרי {max_attempts} ניסיונות – כל ה־article_id שהוגרלו כבר קיימים."
 #     }
 
+
+
+
 import pyodbc  # Library for connecting to SQL Server databases via ODBC
 import random  # For generating random article IDs
 from datetime import datetime  # To handle datetime objects
@@ -103,7 +106,7 @@ def save_to_db(article: dict, max_attempts: int = 10):
     content = article.get("content", "")  # תוכן הכתבה
     topic = article.get("topic", "")  # נושא הכתבה
     published_at = article.get("publishedAt", datetime.now())  # זמן הפרסום
-    title = article.get("title", "")  # ✅ כותרת הכתבה – נכניס ל-comments
+    title = article.get("comments", "")  # ✅ כותרת הכתבה – נכניס ל-comments
 
     # Connection string to the SQL Server database hosted on SOMEE
     conn_str = (

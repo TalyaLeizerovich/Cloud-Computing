@@ -54,13 +54,16 @@ def fetch_latest_article():
             if article_id not in seen_ids:
                 published = item.get("webPublicationDate")
                 body_text = item.get("fields", {}).get("bodyText", "")
+                title = item.get("webTitle", "")  # ✅ כותרת הכתבה
 
                 # Minimal structure for saving the article
                 minimal = {
                     "id": article_id,
                     "fetchedAt": datetime.now().isoformat(),
                     "publishedAt": published,
-                    "content": body_text
+                    "content": body_text,
+                    "comments": title  # ✅ הכותרת נשמרת כאן
+
                 }
 
                 # Insert at the beginning so the newest article is first
