@@ -2,7 +2,7 @@
 # Import FastAPI framework and the router from the app_server module
 
 from fastapi import FastAPI
-from app_server.routes import router
+from app_server.views.routes import router
 
 # Initialize FastAPI application with metadata
 app = FastAPI(

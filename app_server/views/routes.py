@@ -1,8 +1,8 @@
 # app/routes.py
 from fastapi import APIRouter
-from app_server.news import fetch_latest_article
-from app_server.classifier import classify_article
-from app_server.db import save_to_db
+from app_server.controllers.news import fetch_latest_article
+from app_server.controllers.classifier import classify_article
+from app_server.models.db import save_to_db
 
 router = APIRouter()
 
