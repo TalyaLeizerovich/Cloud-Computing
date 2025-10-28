@@ -20,6 +20,6 @@ services:
       - ALLOW_PLAINTEXT_LISTENER=yes
       - KAFKA_LISTENERS=PLAINTEXT://:9092
       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
-      - KAFKA_CFG_ENABLE_KRAFT=false   # מבטל את KRaft mode
+      - KAFKA_CFG_ENABLE_KRAFT=false   
     ports:
       - "9092:9092"

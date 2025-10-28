@@ -9,7 +9,7 @@ with open("keys.json", "r") as f:
 
 HF_API_TOKEN = keys["HF_API_TOKEN"]
 
-API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-mnli"  # HuggingFace zero-shot model endpoint
+API_URL = "https://router.huggingface.co/hf-inference/models/facebook/bart-large-mnli"
 CANDIDATE_LABELS = ["technology", "politics", "sports", "health", "business", "entertainment", "science"]  # Possible topics
 
 

@@ -4,7 +4,7 @@ import json
 import os
 from datetime import datetime, date
 
-# קריאת קובץ הקונפיג
+# Load API key from keys.json
 with open("keys.json", "r") as f:
     keys = json.load(f)
 GUARDIAN_KEY = keys["GUARDIAN_API_KEY"]
@@ -54,7 +54,7 @@ def fetch_latest_article():
             if article_id not in seen_ids:
                 published = item.get("webPublicationDate")
                 body_text = item.get("fields", {}).get("bodyText", "")
-                title = item.get("webTitle", "")  # ✅ כותרת הכתבה
+                title = item.get("webTitle", "") 
 
                 # Minimal structure for saving the article
                 minimal = {
@@ -62,7 +62,7 @@ def fetch_latest_article():
                     "fetchedAt": datetime.now().isoformat(),
                     "publishedAt": published,
                     "content": body_text,
-                    "comments": title  # ✅ הכותרת נשמרת כאן
+                    "comments": title  
 
                 }
 

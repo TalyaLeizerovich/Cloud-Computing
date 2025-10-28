@@ -21,7 +21,7 @@ async def forward_to_app(request: Request, path: str):
         response = await client.post(f"{APP_SERVER_URL}/{path}", json=data)
     return response.json()
 
-# Route GET requests to the display server
+# Route GET requests to the ui server
 @app.get("/api/display/{path:path}")
 async def forward_to_display(path: str):
     async with httpx.AsyncClient() as client:

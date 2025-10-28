@@ -25,7 +25,7 @@ def ner_via_hf_api(text):
 
     try:
         response = requests.post(
-            f"https://api-inference.huggingface.co/models/{HF_NER_MODEL}",
+            f"https://router.huggingface.co/hf-inference/models/{HF_NER_MODEL}",
             headers=headers,
             json=payload,
             timeout=30  # Wait up to 30 seconds

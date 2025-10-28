@@ -1,4 +1,3 @@
-# Article title with date and image alongside the article
 from kafka import KafkaConsumer
 import pyodbc
 import json
@@ -14,42 +13,39 @@ conn_str = (
     f"Encrypt=yes;TrustServerCertificate=yes;"
 )
 
-# --- Consumer matched to your Producer ---
+# --- Consume article IDs from Kafka ---
 def consume_article_ids(topic_name, timeout=5000):
-    """
-    Receives article IDs from Kafka by topic.
-    Matches the format that the Producer sends: {"article_id": ...}
-    """
+    # Create a Kafka consumer for the given topic
     consumer = KafkaConsumer(
         topic_name,
         bootstrap_servers=KAFKA_BROKER,
-        auto_offset_reset='earliest',  # Start from the earliest messages if no offset is committed
-        value_deserializer=lambda m: json.loads(m.decode('utf-8')),  # Deserialize JSON messages
-        consumer_timeout_ms=timeout  # Stop consuming after timeout
+        auto_offset_reset='earliest',  # Start reading from the beginning if no offset
+        value_deserializer=lambda m: json.loads(m.decode('utf-8')),  # Decode JSON messages
+        consumer_timeout_ms=timeout  # Stop consuming after a timeout
     )
     article_ids = []
+    # Iterate over messages received from Kafka
     for message in consumer:
         try:
             data = message.value
             article_id = data.get("article_id")
             if article_id is not None:
-                article_ids.append(article_id)  # Collect valid article IDs
+                article_ids.append(article_id)
         except Exception as e:
             print(f"Error decoding message: {e}")
     return article_ids
 
-# --- Fetch articles from DB by IDs ---
+# --- Fetch articles by IDs from DB ---
 def fetch_articles_by_ids(ids):
-    """
-    Fetch articles from the DB using a list of IDs.
-    Returns a list of dictionaries: {id, title, content, date, topic}
-    """
+    # If no IDs provided, return an empty list
     if not ids:
-        return []  # Return empty list if no IDs provided
+        return []
     try:
+        # Establish a connection to the SQL Server database
         with pyodbc.connect(conn_str, timeout=5) as conn:
             cursor = conn.cursor()
-            placeholders = ','.join('?' for _ in ids)  # Prepare placeholders for SQL query
+            # Prepare placeholders for the SQL query based on number of IDs
+            placeholders = ','.join('?' for _ in ids)
             query = f"""
                 SELECT newId, comments, content, date, topic
                 FROM Posts
@@ -58,41 +54,51 @@ def fetch_articles_by_ids(ids):
             cursor.execute(query, ids)
             rows = cursor.fetchall()
 
-            # Convert each row to a dictionary
+            # Convert rows into a list of article dictionaries
             articles = []
             for row in rows:
                 articles.append({
                     "id": row.newId,
-                    "title": row.comments,   # Article title
+                    "title": row.comments,
                     "content": row.content,
                     "date": row.date,
                     "topic": row.topic
                 })
             return articles
     except pyodbc.OperationalError as e:
+        # Handle connection errors gracefully
         print("Error connecting to DB:", e)
         return []
 
-# --- Format articles for Gradio ---
+# --- Format articles for display (HTML version with layout and styling) ---
 def format_articles(articles):
-    """
-    Returns Markdown text for Gradio display.
-    """
+    # If there are no articles, return a message in HTML
     if not articles:
-        return "אין כתבות זמינות לנושא זה."  # No articles available message
-    md=""
+        return "<p>No articles available for this topic.</p>"
+
+    html = ""
+    # Build HTML structure for each article
     for article in articles:
-        title = article.get("title", "ללא כותרת")  # Default title if missing
-        date = article.get("date", "ללא תאריך")     # Default date if missing
+        title = article.get("title", "No Title")
+        date = article.get("date", "No Date")
         content = article.get("content", "")
-        
-        # Get content and image URL
+
+        # Retrieve an appropriate image using the NER + Guardian API
         text, image_url = article_with_images(content)
-       
-        md += f"### {title}\n"
-        md += f"**Date:** {date} \n\n"
-        md += f"{text}\n\n"
-        if image_url:
-            md += f"![image]({image_url})\n\n"  # Include image if available
-        md += "---\n"
-    return md
+
+        # Create a formatted news card with image and text
+        html += f"""
+        <div class='news-card'>
+            <div class='news-image'>
+                {'<img src="' + image_url + '" alt="Image" />' if image_url else ''}
+            </div>
+            <div class='news-content'>
+                <h3 class='news-title'>{title}</h3>
+                <p class='news-date'>{date}</p>
+                <p class='news-text'>{text}</p>
+            </div>
+        </div>
+        """
+
+    # Return the complete HTML string
+    return html
